@@ -11,6 +11,52 @@ st.set_page_config(page_title="Tactical AI & Space Dashboard", layout="wide", pa
 st.title("🧠 Tactical AI & Space Dashboard")
 st.markdown("Live tracking with algorithmic Support/Resistance zones and ATR clustering.")
 
+
+st.markdown('''
+<style>
+.stApp {
+    background-color: #1a0033;
+    background-image: linear-gradient(135deg, #1a0033 0%, #4d0066 100%);
+    color: #00ffff;
+    font-family: "Courier New", monospace;
+}
+h1, h2, h3, h4 {
+    color: #ff00ea !important;
+    text-shadow: 0px 0px 8px rgba(255, 0, 234, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+[data-testid="stMetricValue"] {
+    color: #39ff14 !important;
+    text-shadow: 0px 0px 8px rgba(57, 255, 20, 0.6);
+}
+[data-testid="stMetricLabel"] {
+    color: #00ffff !important;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+[data-testid="stMetricDelta"] {
+    color: #ffff00 !important;
+}
+.stButton>button {
+    background-color: #ff00ea;
+    color: #ffff00;
+    border: 2px solid #00ffff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #00ffff;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+.stButton>button:hover {
+    background-color: #00ffff;
+    color: #ff00ea;
+    border: 2px solid #ff00ea;
+    box-shadow: 0 0 15px #ff00ea;
+}
+</style>
+''', unsafe_allow_html=True)
+
+
 if 'active_chart' not in st.session_state:
     st.session_state.active_chart = 'HIMX'
 
@@ -36,11 +82,11 @@ def get_macro_data():
 macro_data = get_macro_data()
 
 st.markdown("""
-<div style='background-color: #020617; padding: 1.5rem; border-radius: 0.75rem; color: white; margin-bottom: 1rem; border: 1px solid #1e293b;'>
+<div style='background-color: rgba(26, 0, 51, 0.8); padding: 1.5rem; border-radius: 0.75rem; color: #ffff00; margin-bottom: 1rem; border: 2px solid #ff00ea; box-shadow: 0 0 12px #ff00ea;'>
     <div style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;'>
         <div>
-            <h2 style='margin:0; font-size: 1.5rem; font-weight: bold; color: white;'>Market Pulse</h2>
-            <p style='color: #94a3b8; font-size: 0.875rem; margin: 0;'>Swing trading environment, breadth, volatility, and sentiment</p>
+            <h2 style='margin:0; font-size: 1.5rem; font-weight: bold; color: #ffff00;'>Market Pulse</h2>
+            <p style='color: #00ffff; font-size: 0.875rem; margin: 0;'>Swing trading environment, breadth, volatility, and sentiment</p>
         </div>
         <div style='display: flex; gap: 10px; align-items: center;'>
             <span style='background-color: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 600; font-size: 0.875rem;'>Market Health: 72/100</span>
@@ -61,21 +107,21 @@ def metric_html(symbol, name, price, change, status, is_vix=False):
     sign = "+" if change > 0 else ""
     price_str = f"{price:.2f}" if is_vix else f"${price:.2f}"
     return f"""
-    <div style='background-color: #0f172a; border: 1px solid #1e293b; border-radius: 1rem; padding: 1rem; height: 100%;'>
+    <div style='background-color: rgba(0, 255, 255, 0.1); border: 2px solid #ff00ea; box-shadow: 0 0 12px #ff00ea; border-radius: 1rem; padding: 1rem; height: 100%;'>
         <div style='display: flex; justify-content: space-between; align-items: flex-start;'>
             <div>
                 <div style='display: flex; align-items: center; gap: 0.5rem;'>
-                    <span style='font-size: 1.125rem; font-weight: bold; color: white;'>{symbol}</span>
-                    <span style='font-size: 0.75rem; color: #94a3b8;'>{name}</span>
+                    <span style='font-size: 1.125rem; font-weight: bold; color: #ffff00;'>{symbol}</span>
+                    <span style='font-size: 0.75rem; color: #00ffff;'>{name}</span>
                 </div>
-                <p style='margin: 0.5rem 0 0 0; font-size: 1.5rem; font-weight: 600; color: white;'>{price_str}</p>
+                <p style='margin: 0.5rem 0 0 0; font-size: 1.5rem; font-weight: 600; color: #ffff00;'>{price_str}</p>
             </div>
             <div style='color: {color}; font-size: 0.875rem; font-weight: 600;'>
                 {sign}{change:.2f}%
             </div>
         </div>
         <div style='margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;'>
-            <span style='font-size: 0.75rem; color: #94a3b8;'>Signal</span>
+            <span style='font-size: 0.75rem; color: #00ffff;'>Signal</span>
             <span style='background-color: #1e293b; color: #e2e8f0; padding: 0.1rem 0.5rem; border-radius: 9999px; font-size: 0.75rem;'>{status}</span>
         </div>
     </div>
@@ -87,26 +133,26 @@ with m3: st.markdown(metric_html("IWM", "Russell 2000", iwm.get('price',0), iwm.
 with m4: st.markdown(metric_html("VIX", "Volatility", vix.get('price',0), vix.get('change',0), "Fear Falling", is_vix=True), unsafe_allow_html=True)
 
 st.markdown("""
-<div style='background-color: #0f172a; border: 1px solid #1e293b; border-radius: 1rem; padding: 1rem; margin-top: 1rem; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;'>
-    <div style='background-color: #020617; border: 1px solid #1e293b; border-radius: 0.75rem; padding: 1rem;'>
-        <p style='color: #94a3b8; font-size: 0.875rem; margin: 0;'>Fear & Greed</p>
-        <p style='margin: 0.5rem 0 0 0; font-size: 1.5rem; font-weight: bold; color: white;'>68</p>
-        <p style='color: #94a3b8; font-size: 0.75rem; margin: 0;'>Greed</p>
+<div style='background-color: rgba(0, 255, 255, 0.1); border: 2px solid #ff00ea; box-shadow: 0 0 12px #ff00ea; border-radius: 1rem; padding: 1rem; margin-top: 1rem; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;'>
+    <div style='background-color: rgba(26, 0, 51, 0.8); border: 2px solid #ff00ea; box-shadow: 0 0 12px #ff00ea; border-radius: 0.75rem; padding: 1rem;'>
+        <p style='color: #00ffff; font-size: 0.875rem; margin: 0;'>Fear & Greed</p>
+        <p style='margin: 0.5rem 0 0 0; font-size: 1.5rem; font-weight: bold; color: #ffff00;'>68</p>
+        <p style='color: #00ffff; font-size: 0.75rem; margin: 0;'>Greed</p>
     </div>
-    <div style='background-color: #020617; border: 1px solid #1e293b; border-radius: 0.75rem; padding: 1rem;'>
-        <p style='color: #94a3b8; font-size: 0.875rem; margin: 0;'>% Above 50D MA</p>
-        <p style='margin: 0.5rem 0 0 0; font-size: 1.5rem; font-weight: bold; color: white;'>61%</p>
-        <p style='color: #94a3b8; font-size: 0.75rem; margin: 0;'>Healthy Breadth</p>
+    <div style='background-color: rgba(26, 0, 51, 0.8); border: 2px solid #ff00ea; box-shadow: 0 0 12px #ff00ea; border-radius: 0.75rem; padding: 1rem;'>
+        <p style='color: #00ffff; font-size: 0.875rem; margin: 0;'>% Above 50D MA</p>
+        <p style='margin: 0.5rem 0 0 0; font-size: 1.5rem; font-weight: bold; color: #ffff00;'>61%</p>
+        <p style='color: #00ffff; font-size: 0.75rem; margin: 0;'>Healthy Breadth</p>
     </div>
-    <div style='background-color: #020617; border: 1px solid #1e293b; border-radius: 0.75rem; padding: 1rem;'>
-        <p style='color: #94a3b8; font-size: 0.875rem; margin: 0;'>Put/Call Ratio</p>
-        <p style='margin: 0.5rem 0 0 0; font-size: 1.5rem; font-weight: bold; color: white;'>0.82</p>
-        <p style='color: #94a3b8; font-size: 0.75rem; margin: 0;'>Neutral-Bullish</p>
+    <div style='background-color: rgba(26, 0, 51, 0.8); border: 2px solid #ff00ea; box-shadow: 0 0 12px #ff00ea; border-radius: 0.75rem; padding: 1rem;'>
+        <p style='color: #00ffff; font-size: 0.875rem; margin: 0;'>Put/Call Ratio</p>
+        <p style='margin: 0.5rem 0 0 0; font-size: 1.5rem; font-weight: bold; color: #ffff00;'>0.82</p>
+        <p style='color: #00ffff; font-size: 0.75rem; margin: 0;'>Neutral-Bullish</p>
     </div>
-    <div style='background-color: #020617; border: 1px solid #1e293b; border-radius: 0.75rem; padding: 1rem;'>
-        <p style='color: #94a3b8; font-size: 0.875rem; margin: 0;'>New Highs / Lows</p>
-        <p style='margin: 0.5rem 0 0 0; font-size: 1.5rem; font-weight: bold; color: white;'>142 / 38</p>
-        <p style='color: #94a3b8; font-size: 0.75rem; margin: 0;'>Positive</p>
+    <div style='background-color: rgba(26, 0, 51, 0.8); border: 2px solid #ff00ea; box-shadow: 0 0 12px #ff00ea; border-radius: 0.75rem; padding: 1rem;'>
+        <p style='color: #00ffff; font-size: 0.875rem; margin: 0;'>New Highs / Lows</p>
+        <p style='margin: 0.5rem 0 0 0; font-size: 1.5rem; font-weight: bold; color: #ffff00;'>142 / 38</p>
+        <p style='color: #00ffff; font-size: 0.75rem; margin: 0;'>Positive</p>
     </div>
 </div>
 <hr style="margin-top: 2rem; border-color: #334155;">
@@ -292,7 +338,7 @@ if active_t and active_t in data:
     fig = go.Figure()
     
     date_strings = [f"{d.month}/{d.day}" for d in hist.index]
-    fig.add_trace(go.Candlestick(x=date_strings, open=hist['Open'], high=hist['High'], low=hist['Low'], close=hist['Close'], name='Price'))
+    fig.add_trace(go.Candlestick(x=date_strings, open=hist['Open'], high=hist['High'], low=hist['Low'], close=hist['Close'], name='Price', increasing_line_color='#39ff14', decreasing_line_color='#ff00ea'))
     
     if show_ema10: fig.add_trace(go.Scatter(x=date_strings, y=hist['EMA_10'], mode='lines', name='10 EMA', line=dict(color='orange', width=1)))
     if show_ema21: fig.add_trace(go.Scatter(x=date_strings, y=hist['EMA_21'], mode='lines', name='21 EMA', line=dict(color='yellow', width=1)))
@@ -320,7 +366,7 @@ if active_t and active_t in data:
             tickangle=-45,
             nticks=30  
         ),
-        yaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.1)'),
+        yaxis=dict(showgrid=True, gridcolor='rgba(0,255,255,0.2)'),
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
         showlegend=False,
