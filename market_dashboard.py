@@ -153,13 +153,15 @@ for i, ticker in enumerate(tickers):
             fig = go.Figure()
             
             # Candlesticks
-            fig.add_trace(go.Candlestick(x=hist.index, open=hist['Open'], high=hist['High'], low=hist['Low'], close=hist['Close'], name='Price'))
+            # Convert dates to strings to perfectly skip weekends and show dates clearly
+            date_strings = hist.index.strftime('%Y-%m-%d')
+            fig.add_trace(go.Candlestick(x=date_strings, open=hist['Open'], high=hist['High'], low=hist['Low'], close=hist['Close'], name='Price'))
             
             # MAs
-            if show_ema10: fig.add_trace(go.Scatter(x=hist.index, y=hist['EMA_10'], mode='lines', name='10 EMA', line=dict(color='orange', width=1)))
-            if show_ema21: fig.add_trace(go.Scatter(x=hist.index, y=hist['EMA_21'], mode='lines', name='21 EMA', line=dict(color='yellow', width=1)))
-            if show_sma50: fig.add_trace(go.Scatter(x=hist.index, y=hist['SMA_50'], mode='lines', name='50 SMA', line=dict(color='blue', width=1.5)))
-            if show_sma200: fig.add_trace(go.Scatter(x=hist.index, y=hist['SMA_200'], mode='lines', name='200 SMA', line=dict(color='white', width=2)))
+            if show_ema10: fig.add_trace(go.Scatter(x=date_strings, y=hist['EMA_10'], mode='lines', name='10 EMA', line=dict(color='orange', width=1)))
+            if show_ema21: fig.add_trace(go.Scatter(x=date_strings, y=hist['EMA_21'], mode='lines', name='21 EMA', line=dict(color='yellow', width=1)))
+            if show_sma50: fig.add_trace(go.Scatter(x=date_strings, y=hist['SMA_50'], mode='lines', name='50 SMA', line=dict(color='blue', width=1.5)))
+            if show_sma200: fig.add_trace(go.Scatter(x=date_strings, y=hist['SMA_200'], mode='lines', name='200 SMA', line=dict(color='white', width=2)))
 
             # Zones
             zones_to_plot = []
@@ -174,8 +176,15 @@ for i, ticker in enumerate(tickers):
                 )
 
             fig.update_layout(
-                margin=dict(l=0, r=0, t=10, b=0),
+                margin=dict(l=0, r=0, t=30, b=40),
                 xaxis_rangeslider_visible=False,
+                xaxis=dict(
+                    type='category', 
+                    categoryorder='category ascending',
+                    nticks=10,
+                    showgrid=False
+                ),
+                yaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.1)'),
                 plot_bgcolor='rgba(0,0,0,0)',
                 paper_bgcolor='rgba(0,0,0,0)',
                 showlegend=False,
