@@ -11,6 +11,9 @@ st.set_page_config(page_title="Tactical AI & Space Dashboard", layout="wide", pa
 st.title("🧠 Tactical AI & Space Dashboard")
 st.markdown("Live tracking with algorithmic Support/Resistance zones and ATR clustering.")
 
+if 'active_chart' not in st.session_state:
+    st.session_state.active_chart = 'HIMX'
+
 # --- MACRO HEALTH TOP BAR ---
 @st.cache_data(ttl=60)
 def get_macro_data():
@@ -32,7 +35,6 @@ def get_macro_data():
 
 macro_data = get_macro_data()
 
-# Inject raw HTML/CSS to perfectly mirror the React component's styling
 st.markdown("""
 <div style='background-color: #020617; padding: 1.5rem; border-radius: 0.75rem; color: white; margin-bottom: 1rem; border: 1px solid #1e293b;'>
     <div style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;'>
@@ -114,7 +116,6 @@ st.markdown("""
 st.sidebar.header("Chart Settings")
 show_daily_zones = st.sidebar.checkbox("Show Daily S/R Zones", value=True)
 show_weekly_zones = st.sidebar.checkbox("Show Weekly S/R Zones", value=False)
-show_volume_profile = st.sidebar.checkbox("Show High Volume Areas", value=False)
 st.sidebar.subheader("Moving Averages")
 show_ema10 = st.sidebar.checkbox("10 EMA", value=True)
 show_ema21 = st.sidebar.checkbox("21 EMA", value=True)
@@ -225,55 +226,58 @@ data = get_stock_data(tickers)
 
 st.header("Live Market Overview")
 cols = st.columns(4)
+
+# Create the top row of interactive metric cards with "View Chart" buttons
 for i, ticker in enumerate(tickers):
     if ticker in data:
-        cols[i % 4].metric(label=ticker, value=f"${data[ticker]['price']:.2f}", delta=f"{data[ticker]['change']:.2f}%")
+        with cols[i % 4]:
+            st.metric(label=ticker, value=f"${data[ticker]['price']:.2f}", delta=f"{data[ticker]['change']:.2f}%")
+            if st.button(f"📊 View {ticker} Chart", key=f"btn_{ticker}", use_container_width=True):
+                st.session_state.active_chart = ticker
 
 st.markdown("---")
-st.header("📈 Tactical Algorithmic Charts")
 
-chart_cols = st.columns(2) 
-for i, ticker in enumerate(tickers):
-    if ticker in data:
-        with chart_cols[i % 2]:
-            st.subheader(ticker)
-            hist = data[ticker]['history']
-            
-            fig = go.Figure()
-            
-            date_strings = [f"{d.month}/{d.day}" for d in hist.index]
-            fig.add_trace(go.Candlestick(x=date_strings, open=hist['Open'], high=hist['High'], low=hist['Low'], close=hist['Close'], name='Price'))
-            
-            if show_ema10: fig.add_trace(go.Scatter(x=date_strings, y=hist['EMA_10'], mode='lines', name='10 EMA', line=dict(color='orange', width=1)))
-            if show_ema21: fig.add_trace(go.Scatter(x=date_strings, y=hist['EMA_21'], mode='lines', name='21 EMA', line=dict(color='yellow', width=1)))
-            if show_sma50: fig.add_trace(go.Scatter(x=date_strings, y=hist['SMA_50'], mode='lines', name='50 SMA', line=dict(color='blue', width=1.5)))
-            if show_sma200: fig.add_trace(go.Scatter(x=date_strings, y=hist['SMA_200'], mode='lines', name='200 SMA', line=dict(color='white', width=2)))
+active_t = st.session_state.active_chart
+if active_t and active_t in data:
+    st.header(f"📈 {active_t} Tactical Chart")
+    
+    hist = data[active_t]['history']
+    
+    fig = go.Figure()
+    
+    date_strings = [f"{d.month}/{d.day}" for d in hist.index]
+    fig.add_trace(go.Candlestick(x=date_strings, open=hist['Open'], high=hist['High'], low=hist['Low'], close=hist['Close'], name='Price'))
+    
+    if show_ema10: fig.add_trace(go.Scatter(x=date_strings, y=hist['EMA_10'], mode='lines', name='10 EMA', line=dict(color='orange', width=1)))
+    if show_ema21: fig.add_trace(go.Scatter(x=date_strings, y=hist['EMA_21'], mode='lines', name='21 EMA', line=dict(color='yellow', width=1)))
+    if show_sma50: fig.add_trace(go.Scatter(x=date_strings, y=hist['SMA_50'], mode='lines', name='50 SMA', line=dict(color='blue', width=1.5)))
+    if show_sma200: fig.add_trace(go.Scatter(x=date_strings, y=hist['SMA_200'], mode='lines', name='200 SMA', line=dict(color='white', width=2)))
 
-            zones_to_plot = []
-            if show_daily_zones: zones_to_plot.extend(data[ticker]['daily_zones'])
-            if show_weekly_zones: zones_to_plot.extend(data[ticker]['weekly_zones'])
-            
-            for z in zones_to_plot:
-                fig.add_hrect(
-                    y0=z['bottom'], y1=z['top'], 
-                    fillcolor=z['color'], opacity=0.3, line_width=1, line_color=z['line_color'],
-                    annotation_text=z['label'], annotation_position="top left", annotation_font_size=10
-                )
+    zones_to_plot = []
+    if show_daily_zones: zones_to_plot.extend(data[active_t]['daily_zones'])
+    if show_weekly_zones: zones_to_plot.extend(data[active_t]['weekly_zones'])
+    
+    for z in zones_to_plot:
+        fig.add_hrect(
+            y0=z['bottom'], y1=z['top'], 
+            fillcolor=z['color'], opacity=0.3, line_width=1, line_color=z['line_color'],
+            annotation_text=z['label'], annotation_position="top left", annotation_font_size=12
+        )
 
-            fig.update_layout(
-                margin=dict(l=0, r=0, t=30, b=40),
-                xaxis_rangeslider_visible=False,
-                xaxis=dict(
-                    type='category', 
-                    categoryorder='trace',
-                    showgrid=False,
-                    tickangle=-45,
-                    nticks=30  
-                ),
-                yaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.1)'),
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                showlegend=False,
-                height=400
-            )
-            st.plotly_chart(fig, use_container_width=True)
+    fig.update_layout(
+        margin=dict(l=0, r=0, t=30, b=40),
+        xaxis_rangeslider_visible=False,
+        xaxis=dict(
+            type='category', 
+            categoryorder='trace',
+            showgrid=False,
+            tickangle=-45,
+            nticks=30  
+        ),
+        yaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.1)'),
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        showlegend=False,
+        height=600 # Taller chart since it's the only one
+    )
+    st.plotly_chart(fig, use_container_width=True)
