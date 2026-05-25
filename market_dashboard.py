@@ -153,8 +153,8 @@ for i, ticker in enumerate(tickers):
             fig = go.Figure()
             
             # Candlesticks
-            # Convert dates to strings to perfectly skip weekends and show dates clearly (Month-Day only to save space)
-            date_strings = hist.index.strftime('%b %d')
+            # Format dates as M/D (e.g. 5/17, 5/18) to save space and show consecutive daily progression
+            date_strings = [f"{d.month}/{d.day}" for d in hist.index]
             fig.add_trace(go.Candlestick(x=date_strings, open=hist['Open'], high=hist['High'], low=hist['Low'], close=hist['Close'], name='Price'))
             
             # MAs
@@ -181,8 +181,9 @@ for i, ticker in enumerate(tickers):
                 xaxis=dict(
                     type='category', 
                     categoryorder='trace',
-                    nticks=10,
-                    showgrid=False
+                    showgrid=False,
+                    tickangle=-45,
+                    nticks=30  # Increased to show much more daily granularity
                 ),
                 yaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.1)'),
                 plot_bgcolor='rgba(0,0,0,0)',
