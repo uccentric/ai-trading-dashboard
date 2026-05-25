@@ -44,7 +44,9 @@ def get_stock_data(tickers):
                     "price": current_price,
                     "change": pct_change,
                     "history": hist,
-                    "earnings": earnings_dates
+                    "earnings": earnings_dates,
+                    "support": hist['Low'].min(),
+                    "resistance": hist['High'].max()
                 }
         except Exception as e:
             pass
@@ -72,9 +74,15 @@ for i, ticker in enumerate(tickers):
             st.subheader(ticker)
             hist = data[ticker]['history']
             earnings = data[ticker]['earnings']
+            support = data[ticker]['support']
+            resistance = data[ticker]['resistance']
             
             fig = go.Figure()
             fig.add_trace(go.Scatter(x=hist.index, y=hist['Close'], mode='lines', name='Price', line=dict(color='#00b4d8', width=2)))
+            
+            # Add Support & Resistance Lines
+            fig.add_hline(y=resistance, line_dash="dot", line_color="rgba(255, 99, 132, 0.6)", annotation_text=f"Res: ${resistance:.2f}", annotation_position="top left", annotation_font_color="rgba(255, 99, 132, 0.8)")
+            fig.add_hline(y=support, line_dash="dot", line_color="rgba(75, 192, 192, 0.6)", annotation_text=f"Sup: ${support:.2f}", annotation_position="bottom left", annotation_font_color="rgba(75, 192, 192, 0.8)")
             
             # Find earnings dates in the current window
             min_date = hist.index.min()
