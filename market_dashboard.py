@@ -281,3 +281,29 @@ if active_t and active_t in data:
         height=600 # Taller chart since it's the only one
     )
     st.plotly_chart(fig, use_container_width=True)
+
+st.markdown("---")
+col1, col2 = st.columns(2)
+
+with col1:
+    st.header("🎯 Tactical Analyst Notes")
+    st.markdown("""
+    * **Space / RKLB:** Strong setup going into the SpaceX IPO. Launch cadence accelerating.
+    * **AI Power (BE / FCEL):** BE has parabolic momentum from Oracle/Nebius deals. Watch for pullbacks to enter. FCEL remains speculative.
+    * **AI Backbone (ALAB / ANET):** Core AI infrastructure holdings. Steady accumulation as data center CapEx expands.
+    * **Edge AI (HIMX):** Massive Q1 beat on WiseEye integration. Lock in partial profits if holding.
+    * **Quantum / Defense (RGTI / BBAI):** Track government contracts and defense spending closely.
+    """)
+
+with col2:
+    st.header("🏛️ AI & Space Regulatory Watch")
+    st.info("**May 2026 Policy Radar**")
+    st.markdown("""
+    **Space Sector:**
+    * **FCC Satellite Constellation Rules:** Monitoring spectrum allocation fights between terrestrial telecom and direct-to-cell providers (impacts ASTS, SpaceX).
+    * **Space Debris Mitigation:** Tighter regulations expected for end-of-life deorbiting, which benefits launch providers (RKLB, SpaceX) via replacement cycles.
+
+    **AI Infrastructure:**
+    * **Data Center Grid Constraints:** State-level utility commissions are scrutinizing the massive power draw of AI data centers. Favorable fast-track permitting for on-site fuel cells (Bloom Energy) is a massive tailwind.
+    * **CHIPS Act & Export Controls:** Recent $2B injection for domestic Quantum (RGTI ecosystem). Ongoing tightening of AI chip export bans to China (impacts Nvidia, ALAB).
+    """)
