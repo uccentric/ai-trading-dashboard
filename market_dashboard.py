@@ -49,7 +49,15 @@ h1, h2, h3, h4 {
     border: 1px solid #10b981;
     box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
 }
+
+@media (max-width: 768px) {
+    .stApp { padding: 0.5rem; }
+    h1 { font-size: 1.75rem !important; }
+    h2 { font-size: 1.25rem !important; }
+    div[data-testid="stMetricValue"] { font-size: 1.5rem !important; }
+}
 </style>
+
 ''', unsafe_allow_html=True)
 
 
@@ -79,7 +87,7 @@ macro_data = get_macro_data()
 
 st.markdown("""
 <div style='background-color: #0f172a; padding: 1.5rem; border-radius: 0.75rem; color: white; margin-bottom: 1rem; border: 1px solid #1e293b; box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
-    <div style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;'>
+    <div style='display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1.5rem;'>
         <div>
             <h2 style='margin:0; font-size: 1.5rem; font-weight: bold; color: white;'>Market Pulse</h2>
             <p style='color: #94a3b8; font-size: 0.875rem; margin: 0;'>Swing trading environment, breadth, volatility, and sentiment</p>
@@ -104,7 +112,7 @@ def metric_html(symbol, name, price, change, status, is_vix=False):
     price_str = f"{price:.2f}" if is_vix else f"${price:.2f}"
     return f"""
     <div style='background-color: #1e293b; border: 1px solid #1e293b; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-radius: 1rem; padding: 1rem; height: 100%;'>
-        <div style='display: flex; justify-content: space-between; align-items: flex-start;'>
+        <div style='display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 0.5rem;'>
             <div>
                 <div style='display: flex; align-items: center; gap: 0.5rem;'>
                     <span style='font-size: 1.125rem; font-weight: bold; color: white;'>{symbol}</span>
@@ -129,7 +137,7 @@ with m3: st.markdown(metric_html("IWM", "Russell 2000", iwm.get('price',0), iwm.
 with m4: st.markdown(metric_html("VIX", "Volatility", vix.get('price',0), vix.get('change',0), "Fear Falling", is_vix=True), unsafe_allow_html=True)
 
 st.markdown("""
-<div style='background-color: #1e293b; border: 1px solid #1e293b; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-radius: 1rem; padding: 1rem; margin-top: 1rem; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;'>
+<div style='background-color: #1e293b; border: 1px solid #1e293b; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-radius: 1rem; padding: 1rem; margin-top: 1rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;'>
     <div style='background-color: #0f172a; border: 1px solid #1e293b; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-radius: 0.75rem; padding: 1rem;'>
         <p style='color: #94a3b8; font-size: 0.875rem; margin: 0;'>Fear & Greed</p>
         <p style='margin: 0.5rem 0 0 0; font-size: 1.5rem; font-weight: bold; color: white;'>68</p>
