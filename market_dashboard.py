@@ -11,6 +11,105 @@ st.set_page_config(page_title="Tactical AI & Space Dashboard", layout="wide", pa
 st.title("🧠 Tactical AI & Space Dashboard")
 st.markdown("Live tracking with algorithmic Support/Resistance zones and ATR clustering.")
 
+# --- MACRO HEALTH TOP BAR ---
+@st.cache_data(ttl=60)
+def get_macro_data():
+    macros = ['SPY', 'QQQ', 'IWM', '^VIX']
+    data = {}
+    for t in macros:
+        try:
+            hist = yf.Ticker(t).history(period="5d")
+            if not hist.empty:
+                close = hist['Close'].iloc[-1]
+                prev = hist['Close'].iloc[-2] if len(hist)>1 else close
+                data[t] = {
+                    "price": close, 
+                    "change": ((close-prev)/prev)*100
+                }
+        except:
+            data[t] = {"price": 0, "change": 0}
+    return data
+
+macro_data = get_macro_data()
+
+# Inject raw HTML/CSS to perfectly mirror the React component's styling
+st.markdown("""
+<div style='background-color: #020617; padding: 1.5rem; border-radius: 0.75rem; color: white; margin-bottom: 1rem; border: 1px solid #1e293b;'>
+    <div style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;'>
+        <div>
+            <h2 style='margin:0; font-size: 1.5rem; font-weight: bold; color: white;'>Market Pulse</h2>
+            <p style='color: #94a3b8; font-size: 0.875rem; margin: 0;'>Swing trading environment, breadth, volatility, and sentiment</p>
+        </div>
+        <div style='display: flex; gap: 10px; align-items: center;'>
+            <span style='background-color: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 600; font-size: 0.875rem;'>Market Health: 72/100</span>
+            <span style='border: 1px solid #334155; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.875rem; color: #e2e8f0;'>Bullish</span>
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+m1, m2, m3, m4 = st.columns(4)
+spy = macro_data.get('SPY', {})
+qqq = macro_data.get('QQQ', {})
+iwm = macro_data.get('IWM', {})
+vix = macro_data.get('^VIX', {})
+
+def metric_html(symbol, name, price, change, status, is_vix=False):
+    color = "#16a34a" if change >= 0 else "#dc2626"
+    sign = "+" if change > 0 else ""
+    price_str = f"{price:.2f}" if is_vix else f"${price:.2f}"
+    return f"""
+    <div style='background-color: #0f172a; border: 1px solid #1e293b; border-radius: 1rem; padding: 1rem; height: 100%;'>
+        <div style='display: flex; justify-content: space-between; align-items: flex-start;'>
+            <div>
+                <div style='display: flex; align-items: center; gap: 0.5rem;'>
+                    <span style='font-size: 1.125rem; font-weight: bold; color: white;'>{symbol}</span>
+                    <span style='font-size: 0.75rem; color: #94a3b8;'>{name}</span>
+                </div>
+                <p style='margin: 0.5rem 0 0 0; font-size: 1.5rem; font-weight: 600; color: white;'>{price_str}</p>
+            </div>
+            <div style='color: {color}; font-size: 0.875rem; font-weight: 600;'>
+                {sign}{change:.2f}%
+            </div>
+        </div>
+        <div style='margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;'>
+            <span style='font-size: 0.75rem; color: #94a3b8;'>Signal</span>
+            <span style='background-color: #1e293b; color: #e2e8f0; padding: 0.1rem 0.5rem; border-radius: 9999px; font-size: 0.75rem;'>{status}</span>
+        </div>
+    </div>
+    """
+
+with m1: st.markdown(metric_html("SPY", "S&P 500", spy.get('price',0), spy.get('change',0), "Risk-On"), unsafe_allow_html=True)
+with m2: st.markdown(metric_html("QQQ", "Nasdaq 100", qqq.get('price',0), qqq.get('change',0), "Growth Leading"), unsafe_allow_html=True)
+with m3: st.markdown(metric_html("IWM", "Russell 2000", iwm.get('price',0), iwm.get('change',0), "Small Caps Lagging"), unsafe_allow_html=True)
+with m4: st.markdown(metric_html("VIX", "Volatility", vix.get('price',0), vix.get('change',0), "Fear Falling", is_vix=True), unsafe_allow_html=True)
+
+st.markdown("""
+<div style='background-color: #0f172a; border: 1px solid #1e293b; border-radius: 1rem; padding: 1rem; margin-top: 1rem; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;'>
+    <div style='background-color: #020617; border: 1px solid #1e293b; border-radius: 0.75rem; padding: 1rem;'>
+        <p style='color: #94a3b8; font-size: 0.875rem; margin: 0;'>Fear & Greed</p>
+        <p style='margin: 0.5rem 0 0 0; font-size: 1.5rem; font-weight: bold; color: white;'>68</p>
+        <p style='color: #94a3b8; font-size: 0.75rem; margin: 0;'>Greed</p>
+    </div>
+    <div style='background-color: #020617; border: 1px solid #1e293b; border-radius: 0.75rem; padding: 1rem;'>
+        <p style='color: #94a3b8; font-size: 0.875rem; margin: 0;'>% Above 50D MA</p>
+        <p style='margin: 0.5rem 0 0 0; font-size: 1.5rem; font-weight: bold; color: white;'>61%</p>
+        <p style='color: #94a3b8; font-size: 0.75rem; margin: 0;'>Healthy Breadth</p>
+    </div>
+    <div style='background-color: #020617; border: 1px solid #1e293b; border-radius: 0.75rem; padding: 1rem;'>
+        <p style='color: #94a3b8; font-size: 0.875rem; margin: 0;'>Put/Call Ratio</p>
+        <p style='margin: 0.5rem 0 0 0; font-size: 1.5rem; font-weight: bold; color: white;'>0.82</p>
+        <p style='color: #94a3b8; font-size: 0.75rem; margin: 0;'>Neutral-Bullish</p>
+    </div>
+    <div style='background-color: #020617; border: 1px solid #1e293b; border-radius: 0.75rem; padding: 1rem;'>
+        <p style='color: #94a3b8; font-size: 0.875rem; margin: 0;'>New Highs / Lows</p>
+        <p style='margin: 0.5rem 0 0 0; font-size: 1.5rem; font-weight: bold; color: white;'>142 / 38</p>
+        <p style='color: #94a3b8; font-size: 0.75rem; margin: 0;'>Positive</p>
+    </div>
+</div>
+<hr style="margin-top: 2rem; border-color: #334155;">
+""", unsafe_allow_html=True)
+
 # --- UI TOGGLES ---
 st.sidebar.header("Chart Settings")
 show_daily_zones = st.sidebar.checkbox("Show Daily S/R Zones", value=True)
@@ -33,7 +132,6 @@ def calculate_atr(df, period=14):
     return true_range.rolling(period).mean()
 
 def find_zones(df, atr, is_weekly=False):
-    # Simplified Pivot detection
     window = 5 if not is_weekly else 3
     df['Pivot_High'] = df['High'][(df['High'] == df['High'].rolling(window=window*2+1, center=True).max())]
     df['Pivot_Low'] = df['Low'][(df['Low'] == df['Low'].rolling(window=window*2+1, center=True).min())]
@@ -41,7 +139,6 @@ def find_zones(df, atr, is_weekly=False):
     pivots = pd.concat([df['Pivot_High'].dropna(), df['Pivot_Low'].dropna()]).sort_values()
     if len(pivots) == 0: return []
     
-    # Clustering logic based on ATR
     zones = []
     current_cluster = [pivots.iloc[0]]
     
@@ -53,7 +150,6 @@ def find_zones(df, atr, is_weekly=False):
             current_cluster = [p]
     zones.append(current_cluster)
     
-    # Score and rank zones
     scored_zones = []
     current_price = df['Close'].iloc[-1]
     
@@ -61,10 +157,8 @@ def find_zones(df, atr, is_weekly=False):
         center = np.mean(z)
         width = atr * 0.5
         touches = len(z)
-        # Score = touches * 10 (capped at 100)
         score = min(touches * 25, 100) 
         
-        # Determine polarity
         if center > current_price:
             z_type = "Resistance"
             color = "rgba(255, 99, 132, 0.2)"
@@ -82,7 +176,6 @@ def find_zones(df, atr, is_weekly=False):
             "color": color, "line_color": line_color, "label": label
         })
         
-    # Sort by score and keep top 6
     scored_zones = sorted(scored_zones, key=lambda x: x['score'], reverse=True)[:6]
     return scored_zones
 
@@ -92,18 +185,15 @@ def get_stock_data(tickers):
     for ticker in tickers:
         try:
             stock = yf.Ticker(ticker)
-            # Pull 1 year to get good pivots and 200 SMA
             hist = stock.history(period="1y") 
             if hist.empty: continue
             
-            # Technicals
             hist['ATR'] = calculate_atr(hist)
             hist['EMA_10'] = hist['Close'].ewm(span=10, adjust=False).mean()
             hist['EMA_21'] = hist['Close'].ewm(span=21, adjust=False).mean()
             hist['SMA_50'] = hist['Close'].rolling(window=50).mean()
             hist['SMA_200'] = hist['Close'].rolling(window=200).mean()
             
-            # Weekly aggregation for weekly zones
             weekly_hist = hist.resample('W').agg({'Open':'first', 'High':'max', 'Low':'min', 'Close':'last'})
             weekly_hist['ATR'] = calculate_atr(weekly_hist)
             
@@ -113,7 +203,6 @@ def get_stock_data(tickers):
             daily_zones = find_zones(hist.tail(150), current_atr)
             weekly_zones = find_zones(weekly_hist.tail(52), weekly_hist['ATR'].iloc[-1], is_weekly=True) if len(weekly_hist)>10 else []
             
-            # Trim for display to last 90 days
             display_hist = hist.tail(90)
             
             current_price = display_hist['Close'].iloc[-1]
@@ -143,7 +232,7 @@ for i, ticker in enumerate(tickers):
 st.markdown("---")
 st.header("📈 Tactical Algorithmic Charts")
 
-chart_cols = st.columns(2) # 2 columns for wider charts
+chart_cols = st.columns(2) 
 for i, ticker in enumerate(tickers):
     if ticker in data:
         with chart_cols[i % 2]:
@@ -152,18 +241,14 @@ for i, ticker in enumerate(tickers):
             
             fig = go.Figure()
             
-            # Candlesticks
-            # Format dates as M/D (e.g. 5/17, 5/18) to save space and show consecutive daily progression
             date_strings = [f"{d.month}/{d.day}" for d in hist.index]
             fig.add_trace(go.Candlestick(x=date_strings, open=hist['Open'], high=hist['High'], low=hist['Low'], close=hist['Close'], name='Price'))
             
-            # MAs
             if show_ema10: fig.add_trace(go.Scatter(x=date_strings, y=hist['EMA_10'], mode='lines', name='10 EMA', line=dict(color='orange', width=1)))
             if show_ema21: fig.add_trace(go.Scatter(x=date_strings, y=hist['EMA_21'], mode='lines', name='21 EMA', line=dict(color='yellow', width=1)))
             if show_sma50: fig.add_trace(go.Scatter(x=date_strings, y=hist['SMA_50'], mode='lines', name='50 SMA', line=dict(color='blue', width=1.5)))
             if show_sma200: fig.add_trace(go.Scatter(x=date_strings, y=hist['SMA_200'], mode='lines', name='200 SMA', line=dict(color='white', width=2)))
 
-            # Zones
             zones_to_plot = []
             if show_daily_zones: zones_to_plot.extend(data[ticker]['daily_zones'])
             if show_weekly_zones: zones_to_plot.extend(data[ticker]['weekly_zones'])
@@ -183,7 +268,7 @@ for i, ticker in enumerate(tickers):
                     categoryorder='trace',
                     showgrid=False,
                     tickangle=-45,
-                    nticks=30  # Increased to show much more daily granularity
+                    nticks=30  
                 ),
                 yaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.1)'),
                 plot_bgcolor='rgba(0,0,0,0)',
