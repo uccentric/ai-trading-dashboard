@@ -180,7 +180,7 @@ for i, ticker in enumerate(tickers):
                 xaxis_rangeslider_visible=False,
                 xaxis=dict(
                     type='category', 
-                    categoryorder='category ascending',
+                    categoryorder='trace',
                     nticks=10,
                     showgrid=False
                 ),
