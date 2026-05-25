@@ -222,6 +222,52 @@ def get_stock_data(tickers):
             pass
     return data
 
+
+@st.cache_data(ttl=3600)
+def get_insider_summary(tickers):
+    data = []
+    for t in tickers:
+        try:
+            stock = yf.Ticker(t)
+            df = stock.insider_transactions
+            if df is not None and not df.empty and 'Text' in df.columns and 'Value' in df.columns:
+                df = df.dropna(subset=['Value', 'Start Date'])
+                df = df[df['Value'] > 0] # Filter out 0 value grants
+                df = df.sort_values(by='Start Date', ascending=False)
+                for idx, row in df.head(5).iterrows():
+                    date = row['Start Date'].strftime('%Y-%m-%d') if pd.notnull(row['Start Date']) else ''
+                    insider = str(row.get('Insider', 'Unknown')).title()
+                    action = str(row.get('Text', ''))
+                    if 'Sale' in action:
+                        action_type = '🔴 Sale'
+                    elif 'Buy' in action or 'Purchase' in action:
+                        action_type = '🟢 Buy'
+                    else:
+                        continue
+                        
+                    val = row['Value']
+                    if val >= 1000000:
+                        val_str = f'${val/1000000:.1f}M'
+                    else:
+                        val_str = f'${val:,.0f}'
+                        
+                    data.append({
+                        'Date': date,
+                        'Ticker': t,
+                        'Insider': insider,
+                        'Action': action_type,
+                        'Value': val_str,
+                        'Shares': f"{row.get('Shares', 0):,}"
+                    })
+        except:
+            pass
+    if data:
+        data = sorted(data, key=lambda x: x['Date'], reverse=True)
+    return pd.DataFrame(data)
+
+insider_df = get_insider_summary(tickers)
+
+
 data = get_stock_data(tickers)
 
 st.header("Live Market Overview")
@@ -281,6 +327,16 @@ if active_t and active_t in data:
         height=600 # Taller chart since it's the only one
     )
     st.plotly_chart(fig, use_container_width=True)
+
+
+st.markdown("---")
+st.header("🕵️ Smart Money: Insider Transactions")
+st.markdown("Live tracking of executive buys and sales. Large founder cash-outs (over $1M) often create near-term price ceilings.")
+if not insider_df.empty:
+    st.dataframe(insider_df, use_container_width=True, hide_index=True)
+else:
+    st.info("No significant insider transactions reported recently.")
+
 
 st.markdown("---")
 col1, col2 = st.columns(2)
