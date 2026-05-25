@@ -153,8 +153,8 @@ for i, ticker in enumerate(tickers):
             fig = go.Figure()
             
             # Candlesticks
-            # Convert dates to strings to perfectly skip weekends and show dates clearly
-            date_strings = hist.index.strftime('%Y-%m-%d')
+            # Convert dates to strings to perfectly skip weekends and show dates clearly (Month-Day only to save space)
+            date_strings = hist.index.strftime('%b %d')
             fig.add_trace(go.Candlestick(x=date_strings, open=hist['Open'], high=hist['High'], low=hist['Low'], close=hist['Close'], name='Price'))
             
             # MAs
