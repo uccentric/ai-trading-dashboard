@@ -172,7 +172,7 @@ show_ema21 = st.sidebar.checkbox("21 EMA", value=True)
 show_sma50 = st.sidebar.checkbox("50 SMA", value=False)
 show_sma200 = st.sidebar.checkbox("200 SMA", value=False)
 
-tickers = ['HIMX', 'BE', 'FCEL', 'RKLB', 'ALAB', 'ANET', 'RGTI', 'BBAI', 'NBIS']
+tickers = ['HIMX', 'BE', 'FCEL', 'RKLB', 'ALAB', 'ANET', 'RGTI', 'BBAI', 'NBIS', 'KEEL']
 
 def calculate_atr(df, period=14):
     high_low = df['High'] - df['Low']
